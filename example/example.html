@@ -1,0 +1,35 @@
+<html>
+<head>
+<title>jQuery DateSpanPicker</title>
+
+<link rel="stylesheet" type="text/css" href="example.css" />
+
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js"></script>
+<script type="text/javascript" src="jquery.date_input.js"></script>
+<script type="text/javascript" src="../jquery.datespan-picker.js"></script>
+
+<script type="text/javascript">
+$( function () {
+	$( '#picker' ).dateSpanPicker();
+});
+</script>
+
+</head>
+
+<body>
+
+<div id="picker">
+
+<input type="text" class="picker-start-date" name="start_date" />
+<input type="text" class="picker-start-time" name="start_time" />
+
+<input type="text" class="picker-end-date" name="end_date" />
+<input type="text" class="picker-end-time" name="end_time" />
+
+<input type="checkbox" id="all_day" name="all_day" />
+<label for="all_day">All day</label>
+
+</div>
+
+</body>
+</html>

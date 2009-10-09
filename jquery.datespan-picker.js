@@ -1,19 +1,19 @@
 ( function ( $ ) {
-function TimePicker ( options ) {
+function DateSpanPicker ( options ) {
 	var _options = {};
-	$.extend( _options, options, TimePicker.prototype.defaults );
+	$.extend( _options, options, DateSpanPicker.prototype.defaults );
 	
-	var allTimes = TimePicker.prototype._makeTimes();
+	var allTimes = DateSpanPicker.prototype._makeTimes();
 	
-	function _createElement( $parent ) {
+	function _createElements( $parent ) {
 		/*$parent
 			.append( '<input*/
 		throw 'Not implemented';
 	}
 	
 	this.each( function () {
-		//_createElements( $( this ) );
 		var $this = $( this );
+		//DateSpanPicker.prototype._createElements( $this );
 		
 		$( 'input', this ).each( function () {
 			var $this = $( this );
@@ -29,6 +29,15 @@ function TimePicker ( options ) {
 		var $start_time = $( '.picker-start-time', this );
 		var $end_date = $( '.picker-end-date', this );
 		var $end_time = $( '.picker-end-time', this );
+		
+		if( $start_date.val() == '' || $start_time.val() == ''
+			|| $end_date.val() == '' || $end_time.val() == '' ) {
+			var now = new Date();
+			$start_date.val( DateSpanPicker.prototype._dateToString( now ) );
+			$start_time.val( DateSpanPicker.prototype._dateToTimeString( now ) );
+			$end_date.val( DateSpanPicker.prototype._dateToString( now ) );
+			$end_time.val( DateSpanPicker.prototype._dateToTimeString( now ) );
+		}
 
 		$start_date.change( function () {
 			linkUpdated(
@@ -109,7 +118,7 @@ function TimePicker ( options ) {
 			var times;
 			if( $start_date.val() == $end_date.val() ) {
 				var minMinutes = getMinutesForTime( $start_time );
-				times = TimePicker.prototype._makeTimes({
+				times = DateSpanPicker.prototype._makeTimes({
 					minMinutes: minMinutes,
 					liContent: function ( content, minutes ) {
 						var diff = minutes - minMinutes;
@@ -158,8 +167,8 @@ function TimePicker ( options ) {
 
 		target_date.setTime( new_date.getTime() + ( target_date - old_date ) );
 
-		target.date.val( TimePicker.prototype._dateToString( target_date ) ).change();
-		target.time.val( TimePicker.prototype._dateToTimeString( target_date ) ).change();
+		target.date.val( DateSpanPicker.prototype._dateToString( target_date ) ).change();
+		target.time.val( DateSpanPicker.prototype._dateToTimeString( target_date ) ).change();
 	}
 	
 	function getMinutesForTime( element ) {
@@ -178,7 +187,7 @@ function TimePicker ( options ) {
 	}
 	
 	function getDateFromFieldValues( date, time ) {
-		var d = TimePicker.prototype._stringToDate( date );
+		var d = DateSpanPicker.prototype._stringToDate( date );
 		match = time.match( /^(\d+):(\d+)(am|pm)$/ );
 		var hr = parseInt( match[1] == '12' ? 0 : match[1] ) + parseInt( match[3] == 'pm' ? 12 : 0 );
 		d.setHours( hr, match[2] );
@@ -186,7 +195,7 @@ function TimePicker ( options ) {
 	}
 }
 
-TimePicker.prototype._makeTimes = function ( options ) {
+DateSpanPicker.prototype._makeTimes = function ( options ) {
 	var o = {
 		minMinutes: 0,
 		maxMinutes: 1440,
@@ -219,7 +228,7 @@ TimePicker.prototype._makeTimes = function ( options ) {
 	}
 }
 
-TimePicker.prototype._stringToDate = function ( string ) {
+DateSpanPicker.prototype._stringToDate = function ( string ) {
 	var matches;
 	if( matches = string.match( /^(\d{4,4})-(\d{2,2})-(\d{2,2})$/ ) ) {
 		return new Date( matches[1], matches[2] - 1, matches[3] );
@@ -229,7 +238,7 @@ TimePicker.prototype._stringToDate = function ( string ) {
 	};
 }
 
-TimePicker.prototype._dateToString = function ( date ) {
+DateSpanPicker.prototype._dateToString = function ( date ) {
 	var month = ( date.getMonth() + 1 ).toString();
 	var dom = date.getDate().toString();
 	if( month.length == 1 ) month = "0" + month;
@@ -237,7 +246,7 @@ TimePicker.prototype._dateToString = function ( date ) {
 	return date.getFullYear() + "-" + month + "-" + dom;
 }
 
-TimePicker.prototype._dateToTimeString = function ( date ) {
+DateSpanPicker.prototype._dateToTimeString = function ( date ) {
 	var hour = date.getHours();
 	var str = hour >= 12 ? 'pm' : 'am';
 	hour = hour == 0 ? 12 : ( hour > 12 ? hour - 12 : hour );
@@ -247,14 +256,14 @@ TimePicker.prototype._dateToTimeString = function ( date ) {
 	return str;
 }
 
-TimePicker.prototype.defaults = {
+DateSpanPicker.prototype.defaults = {
 	date_input_defaults: {
-		stringToDate: TimePicker.prototype._stringToDate,
-		dateToString: TimePicker.prototype._dateToString,
+		stringToDate: DateSpanPicker.prototype._stringToDate,
+		dateToString: DateSpanPicker.prototype._dateToString,
 		short_day_names: ["S", "M", "T", "W", "T", "F", "S"],
 		start_of_week: 0
 	}
 };
 
-$.fn.timePicker = TimePicker;
+$.fn.dateSpanPicker = DateSpanPicker;
 })( jQuery );

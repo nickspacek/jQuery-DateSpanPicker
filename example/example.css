@@ -1,0 +1,104 @@
+
+.date_selector {
+  background: #C3D9FF;
+  border: 1px solid #C3D9FF;
+  position: absolute;
+  z-index: 100000;
+  display: none;
+  line-height: 1em;
+  font-family: Arial, sans-serif;
+  font-size: 70%;
+  width: 12.45em;
+}
+.date_selector_ieframe {
+  position: absolute;
+  z-index: 99999;
+  display: none;
+}
+.date_selector .nav {
+}
+.date_selector .month_nav, .date_selector .year_nav {
+  margin: 0 0 3px 0;
+  padding: 0;
+  display: block;
+  position: relative;
+  text-align: center;
+  font-weight: bold;
+}
+.date_selector .month_nav {
+}
+.date_selector .year_nav {
+  display: none;
+}
+.date_selector .month_name, .date_selector .year_name {
+  display: block;
+  margin-top: 2px;
+}
+.date_selector .button {
+  position: absolute;
+  top: 0;
+  margin: 0 12px;
+}
+  .date_selector .button:hover, .date_selector .button.hover {
+    background: none;
+    color: #003C78;
+    cursor: pointer;
+    border-color: #ccc;
+  }
+.date_selector .prev {
+  left: 0;
+}
+.date_selector .next {
+  right: 0;
+}
+.date_selector table {
+  border-spacing: 0;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.date_selector th, .date_selector td {
+  font-family: Verdana, sans-serif;
+  padding: 2px;
+  
+  text-align: center;
+  font-size: 65%;
+}
+.date_selector th {
+  font-weight: normal;
+}
+.date_selector td {
+  background: white;
+}
+.date_selector td.today {
+  background: #FFFEB3;
+}
+.date_selector td.unselected_month {
+  color: #ccc;
+}
+.date_selector td.selectable_day {
+  cursor: pointer;
+}
+.date_selector td.selected {
+  background: #D8DFE5;
+  font-weight: bold;
+}
+.date_selector td.selectable_day:hover, .date_selector td.selectable_day.hover {
+  background: #003C78;
+  color: white;
+}
+
+.picker-time-chooser {
+  height: 10em;
+  list-style: none;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: 0;
+  width: 6em;
+}
+
+.picker-sameday {
+  width: 11em;
+}
+
+
