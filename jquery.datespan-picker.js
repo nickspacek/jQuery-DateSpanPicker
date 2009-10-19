@@ -1,199 +1,197 @@
 ( function ( $ ) {
-function DateSpanPicker ( options ) {
-	var _options = {};
-	$.extend( _options, options, DateSpanPicker.prototype.defaults );
-	
-	var allTimes = DateSpanPicker.prototype._makeTimes();
-	
-	function _createElements( $parent ) {
-		/*$parent
-			.append( '<input*/
-		throw 'Not implemented';
-	}
-	
+
+$.fn.dateSpanPicker = function ( options ) {
 	this.each( function () {
-		var $this = $( this );
-		//DateSpanPicker.prototype._createElements( $this );
-		
-		$( 'input', this ).each( function () {
-			var $this = $( this );
-			$this.data( 'newValue', $this.val() )
-				.data( 'oldValue', $this.val() )
-				.change( function () {
-					$this.data( 'oldValue', $this.data( 'newValue' ) );
-					$this.data( 'newValue', $this.val() );
-				});
-		});
-		
-		var $start_date = $( '.picker-start-date', this );
-		var $start_time = $( '.picker-start-time', this );
-		var $end_date = $( '.picker-end-date', this );
-		var $end_time = $( '.picker-end-time', this );
-		
-		if( $start_date.val() == '' || $start_time.val() == ''
-			|| $end_date.val() == '' || $end_time.val() == '' ) {
-			var now = new Date();
-			$start_date.val( DateSpanPicker.prototype._dateToString( now ) );
-			$start_time.val( DateSpanPicker.prototype._dateToTimeString( now ) );
-			$end_date.val( DateSpanPicker.prototype._dateToString( now ) );
-			$end_time.val( DateSpanPicker.prototype._dateToTimeString( now ) );
-		}
-
-		$start_date.change( function () {
-			linkUpdated(
-				getDateFromFieldValues(
-					$start_date.val(),
-					$start_time.val()
-				),
-				getDateFromFieldValues(
-					$start_date.data( 'oldValue' ),
-					$start_time.val()
-				),
-				{
-					date: $end_date,
-					time: $end_time
-				}
-			);
-		});
-		$start_time.change( function () {
-			linkUpdated(
-				getDateFromFieldValues(
-					$start_date.val(),
-					$start_time.val()
-				),
-				getDateFromFieldValues(
-					$start_date.val(),
-					$start_time.data( 'oldValue' )
-				),
-				{
-					date: $end_date,
-					time: $end_time
-				}
-			);
-		});
-		
-		$start_date.date_input( _options.date_input_defaults );
-		$end_date.date_input( _options.date_input_defaults );
-	
-		$( '#all_day' ).change( function () {
-			$start_time.toggle( !this.checked );
-			$end_time.toggle( !this.checked );
-		});
-		
-		$.each( [ $end_time, $start_time ], function () {
-			var $this = this;
-			$this
-				.click( function () {
-					if( $this.hasClass( 'picker-focus' ) ) {
-						$this.data( 'time-chooser' ).filter( ':hidden' ).show();
-					}
-				})
-				.keyup( function ( e ) {
-					if( e.keyCode == 40 /* down */ ) {
-						$( this ).click();
-					}
-				})
-				.blur( function () {
-					if( $this.data( 'timeClick' ) ) {
-						$this.data( 'timeClick', false );
-						return false;
-					}
-					$this.data( 'time-chooser' ).remove();
-					$this.removeClass( 'picker-focus' ).removeData( 'time-chooser' );
-				});
-		});
-		// TODO: Merge these focus things better or something
-		$start_time.focus( function () {
-			var $this = $( this );
-			var offset = $this.offset();
-			var times = allTimes.clone( true ).css({
-				position: 'absolute',
-				top: offset.top + $start_time.outerHeight(),
-				left: offset.left
-			}); // TODO: remove cloning
-			$this.addClass( 'picker-focus' ).data( 'time-chooser', times ).after( times );
-		});
-		$end_time.focus( function (e) {
-			var $this = $( this );
-			var times;
-			if( $start_date.val() == $end_date.val() ) {
-				var minMinutes = getMinutesForTime( $start_time );
-				times = DateSpanPicker.prototype._makeTimes({
-					minMinutes: minMinutes,
-					liContent: function ( content, minutes ) {
-						var diff = minutes - minMinutes;
-						var hours = ( diff / 60 ) | 0;
-						var mins = diff % 60 ? .5 : 0;
-						var timeString;
-						if( hours > 1 || ( hours == 1 && mins ) ) {
-							timeString = hours + mins + ' hrs';
-						}
-						else if( hours < 1 ) {
-							timeString = mins ? '30 mins' : '0 mins';
-						}
-						else if( hours == 1 && !mins ) {
-							timeString = '1 hr';
-						}
-						return content + ' (' + timeString + ')';
-					}
-				}).addClass( 'picker-sameday' );
-			}
-			else {
-				times = allTimes.clone( true ); // TODO: remove cloning
-			}
-			
-			var offset = $this.offset();
-			times.css({
-				position: 'absolute',
-				top: offset.top + $end_time.outerHeight(),
-				left: offset.left
-			})
-
-			$this.addClass( 'focus' ).data( 'time-chooser', times ).after( times );
-		})
+		new DateSpanPicker( this, options );
 	});
 	
 	return this;
+};
+
+function DateSpanPicker ( target, options ) {
+	var dsp = this;
+	var _options = {};
+	$.extend( _options, options, dsp.defaults );
 	
-	function linkUpdated ( new_date, old_date, target ) {
-		var target_date = getDateFromFieldValues(
-			target.date.val(),
-			target.time.val()
-		);
-
-		if( target_date < old_date ) {
-			return;
-		}
-
-		target_date.setTime( new_date.getTime() + ( target_date - old_date ) );
-
-		target.date.val( DateSpanPicker.prototype._dateToString( target_date ) ).change();
-		target.time.val( DateSpanPicker.prototype._dateToTimeString( target_date ) ).change();
+	var allTimes = dsp._makeTimes();
+	
+	var $t = $( target );
+	
+	var $start_date = $( _options.classes.start_date, $t );
+	var $start_time = $( _options.classes.start_time, $t );
+	var $end_date = $( _options.classes.end_date, $t );
+	var $end_time = $( _options.classes.end_time, $t );
+	
+	if( $start_date.val() == '' || $start_time.val() == ''
+		|| $end_date.val() == '' || $end_time.val() == '' ) {
+		var now = new Date();
+		$start_date.val( dsp._dateToString( now ) );
+		$start_time.val( dsp._dateToTimeString( now ) );
+		$end_date.val( dsp._dateToString( now ) );
+		$end_time.val( dsp._dateToTimeString( now ) );
 	}
 	
-	function getMinutesForTime( element ) {
-		/*if( !element.jQuery ) {
-			element = $( element );
-		}*/
-		var m;
-		if( ( m = element.val().match(/(\d+):(\d+)(am|pm)/) ) && m.length == 4 ) {
-			return parseInt( m[1] != 12 ? m[1] * 60 : 0 ) +
-				parseInt( m[2] ) +
-				parseInt( m[3] == 'pm' ? 720 : 0 );
+	$( 'input', $t ).each( function () {
+		var $t = $( this );
+		$t.data( 'newValue', $t.val() )
+			.data( 'oldValue', $t.val() )
+			.change( function () {
+				$t.data( 'oldValue', $t.data( 'newValue' ) );
+				$t.data( 'newValue', $t.val() );
+				
+				$t.trigger( 'changed' );
+			});
+	});
+
+	$start_date.bind( 'changed', function () {
+		dsp.linkUpdated(
+			dsp.getDateFromFieldValues(
+				$start_date.val(),
+				$start_time.val()
+			),
+			dsp.getDateFromFieldValues(
+				$start_date.data( 'oldValue' ),
+				$start_time.val()
+			),
+			{
+				date: $end_date,
+				time: $end_time
+			}
+		);
+	});
+	$start_time.bind( 'changed', function () {
+		dsp.linkUpdated(
+			dsp.getDateFromFieldValues(
+				$start_date.val(),
+				$start_time.val()
+			),
+			dsp.getDateFromFieldValues(
+				$start_date.val(),
+				$start_time.data( 'oldValue' )
+			),
+			{
+				date: $end_date,
+				time: $end_time
+			}
+		);
+	});
+
+	$start_date.date_input( _options.date_input_defaults );
+	$end_date.date_input( _options.date_input_defaults );
+
+	$( _options.classes.all_day, $t ).change( function () {
+		$start_time.toggle( !this.checked );
+		$end_time.toggle( !this.checked );
+	});
+	
+	$.each( [ $end_time, $start_time ], function () {
+		var $this = this;
+		$this
+			.click( function () {
+				if( $this.hasClass( 'picker-focus' ) ) {
+					$this.data( 'time-chooser' ).filter( ':hidden' ).show();
+				}
+			})
+			.keyup( function ( e ) {
+				if( e.keyCode == 40 /* down */ ) {
+					$( this ).click();
+				}
+			})
+			.blur( function () {
+				if( $this.data( 'timeClick' ) ) {
+					$this.data( 'timeClick', false );
+					return false;
+				}
+				$this.data( 'time-chooser' ).remove();
+				$this.removeClass( 'picker-focus' ).removeData( 'time-chooser' );
+			});
+	});
+	// TODO: Merge these focus things better or something
+	$start_time.focus( function () {
+		var $this = $( this );
+		var offset = $this.offset();
+		var times = allTimes.clone( true ).css({
+			position: 'absolute',
+			top: offset.top + $start_time.outerHeight(),
+			left: offset.left
+		}); // TODO: remove cloning
+		$this.addClass( 'picker-focus' ).data( 'time-chooser', times ).after( times );
+	});
+	$end_time.focus( function (e) {
+		var $this = $( this );
+		var times;
+		if( $start_date.val() == $end_date.val() ) {
+			var minMinutes = dsp.getMinutesForTime( $start_time );
+			times = dsp._makeTimes({
+				minMinutes: minMinutes,
+				liContent: function ( content, minutes ) {
+					var diff = minutes - minMinutes;
+					var hours = ( diff / 60 ) | 0;
+					var mins = diff % 60 ? .5 : 0;
+					var timeString;
+					if( hours > 1 || ( hours == 1 && mins ) ) {
+						timeString = hours + mins + ' hrs';
+					}
+					else if( hours < 1 ) {
+						timeString = mins ? '30 mins' : '0 mins';
+					}
+					else if( hours == 1 && !mins ) {
+						timeString = '1 hr';
+					}
+					return content + ' (' + timeString + ')';
+				}
+			}).addClass( 'picker-sameday' );
 		}
 		else {
-			throw 'Invalid text in element. (' + element.id + ')';
+			times = allTimes.clone( true ); // TODO: remove cloning
 		}
-	}
-	
-	function getDateFromFieldValues( date, time ) {
-		var d = DateSpanPicker.prototype._stringToDate( date );
-		match = time.match( /^(\d+):(\d+)(am|pm)$/ );
-		var hr = parseInt( match[1] == '12' ? 0 : match[1] ) + parseInt( match[3] == 'pm' ? 12 : 0 );
-		d.setHours( hr, match[2] );
-		return d;
-	}
+		
+		var offset = $this.offset();
+		times.css({
+			position: 'absolute',
+			top: offset.top + $end_time.outerHeight(),
+			left: offset.left
+		});
+
+		$this.addClass( 'focus' ).data( 'time-chooser', times ).after( times );
+	});
 }
+
+DateSpanPicker.prototype.linkUpdated = function ( new_date, old_date, target ) {
+	var target_date = this.getDateFromFieldValues(
+		target.date.val(),
+		target.time.val()
+	);
+
+	if( target_date < old_date ) {
+		return;
+	}
+
+	target_date.setTime( new_date.getTime() + ( target_date - old_date ) );
+
+	target.date.val( this._dateToString( target_date ) ).change();
+	target.time.val( this._dateToTimeString( target_date ) ).change();
+};
+	
+DateSpanPicker.prototype.getMinutesForTime = function ( element ) {
+	var m;
+	if( ( m = element.val().match(/(\d+):(\d+)(am|pm)/) ) && m.length == 4 ) {
+		return parseInt( m[1] != 12 ? m[1] * 60 : 0 ) +
+			parseInt( m[2] ) +
+			parseInt( m[3] == 'pm' ? 720 : 0 );
+	}
+	else {
+		throw 'Invalid text in element. (' + element.id + ')';
+	}
+};
+	
+DateSpanPicker.prototype.getDateFromFieldValues = function ( date, time ) {
+	var d = this._stringToDate( date );
+	var m = time.match( /^(\d+):(\d+)(am|pm)$/ );
+	var hr = parseInt( m[1] == '12' ? 0 : m[1] ) + parseInt( m[3] == 'pm' ? 12 : 0 );
+	d.setHours( hr, m[2] );
+	return d;
+};
 
 DateSpanPicker.prototype._makeTimes = function ( options ) {
 	var o = {
@@ -229,9 +227,9 @@ DateSpanPicker.prototype._makeTimes = function ( options ) {
 }
 
 DateSpanPicker.prototype._stringToDate = function ( string ) {
-	var matches;
-	if( matches = string.match( /^(\d{4,4})-(\d{2,2})-(\d{2,2})$/ ) ) {
-		return new Date( matches[1], matches[2] - 1, matches[3] );
+	var m;
+	if( m = string.match( /^(\d{4})-(\d{2})-(\d{2})$/ ) ) {
+		return new Date( m[1], m[2]-1, m[3] );
 	}
 	else {
 		return null;
@@ -262,8 +260,14 @@ DateSpanPicker.prototype.defaults = {
 		dateToString: DateSpanPicker.prototype._dateToString,
 		short_day_names: ["S", "M", "T", "W", "T", "F", "S"],
 		start_of_week: 0
+	},
+	classes: {
+		start_date: '.picker-start-date',
+		start_time: '.picker-start-time',
+		end_date: '.picker-end-date',
+		end_time: '.picker-end-time',
+		all_day: '.picker-all-day'
 	}
 };
 
-$.fn.dateSpanPicker = DateSpanPicker;
 })( jQuery );
